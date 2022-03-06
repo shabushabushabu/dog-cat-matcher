@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require('mongoose');
 
 const UserAPIs = require("./APIs/User");
+const AnimalAPIs = require("./APIs/Animal");
 const AuthenticationAPIs = require("./APIs/Authentication");
 
 //----------- Initialisation -------------
@@ -17,6 +18,11 @@ mongoose.connect('mongodb://localhost:27017/dogcatmatcher');
 
 app.get("/user/:email", UserAPIs.GetUserHandler)
 app.post("/user", UserAPIs.PostUserHandler)
+
+app.get("/animal/:id", AnimalAPIs.GetAnimalByIdHandler)
+app.get("/animalList", AnimalAPIs.GetAnimalListHandler)
+app.post("/animal", AnimalAPIs.PostAnimalHandler)
+
 
 app.post("/login", AuthenticationAPIs.LoginHandler)              
 
