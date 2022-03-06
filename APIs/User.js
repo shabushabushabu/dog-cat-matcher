@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const UserModel = require("../Models/User");
 
 const GetUserHandler = async (req, res) => {
-    console.log("GET /user");
+    console.log("GET /user/:email");
     console.log(req.params);
 
     const userEmail = req.params.email;
