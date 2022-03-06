@@ -18,10 +18,14 @@ mongoose.connect('mongodb://localhost:27017/dogcatmatcher');
 
 app.get("/user/:email", UserAPIs.GetUserHandler)
 app.post("/user", UserAPIs.PostUserHandler)
+app.put("/user/:email", UserAPIs.PutUserDetailsHandler)
+app.delete("/user/:email", UserAPIs.DeleteUserHandler)
 
 app.get("/animal/:id", AnimalAPIs.GetAnimalByIdHandler)
 app.get("/animalList", AnimalAPIs.GetAnimalListHandler)
 app.post("/animal", AnimalAPIs.PostAnimalHandler)
+app.put("/animal/:id", AnimalAPIs.PutAnimalHandler)
+app.delete("/animal/:id", AnimalAPIs.DeleteAnimalHandler)
 
 
 app.post("/login", AuthenticationAPIs.LoginHandler)              

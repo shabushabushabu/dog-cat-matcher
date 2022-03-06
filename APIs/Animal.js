@@ -49,8 +49,44 @@ const PostAnimalHandler = async (req, res) => {
     res.send(JSON.stringify(result));  
 }
 
+const PutAnimalHandler = async (req, res) => {
+    console.log("PUT /animal/:id");
+    console.log(req.body);
+
+    const id = req.params.id;
+
+    const updateAnimal = {
+        name: req.body.name,
+        description: req.body.description,
+        photoUrls: [],
+        tags: req.body.tags
+    }
+    // TODO check exist
+    const result = await AnimalModel.Animal.updateOne({_id: id}, updateAnimal);
+    res.send({
+        "message": "success",
+        "status": "animal updated"
+    });   
+}
+
+const DeleteAnimalHandler = async (req, res) => {
+    console.log("DELETE /animal/:id");
+    console.log(req.params);
+
+    const id = req.params.id;
+    
+    // TODO check exist
+    const result = await AnimalModel.Animal.deleteOne({_id: id});
+    res.send({
+        "message": "success",
+        "status": "animal deleted"
+    });
+}
+
 module.exports = {
     GetAnimalByIdHandler,
     GetAnimalListHandler,
-    PostAnimalHandler
+    PostAnimalHandler,
+    PutAnimalHandler,
+    DeleteAnimalHandler
 }

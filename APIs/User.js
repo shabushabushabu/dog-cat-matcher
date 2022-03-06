@@ -56,7 +56,61 @@ const PostUserHandler = async (req, res) => {
     }
 }
 
+const PutUserDetailsHandler = async (req, res) => {
+    console.log("PUT /user/:id");
+    console.log(req.body);
+
+    const userEmail = req.params.email;
+    const docs = await UserModel.User.findOne({email: userEmail})
+    if (docs){
+        console.log("Update user to DB")
+        const result = await UserModel.User.updateOne(
+            {email: userEmail}, 
+            {name: req.body.name});
+        res.send(JSON.stringify({
+            "result": "success",
+            "status": "user details updated"
+        }));
+    } else{
+        console.log("User not exist")
+        res.sendStatus(404);
+    }
+
+}
+
+const DeleteUserHandler = async (req, res) => {
+    console.log("DELETE /user/:email");
+    console.log(req.body);
+    
+
+    const userEmail = req.params.email;
+
+    const user = await UserModel.User.findOne({email: userEmail})
+    if (user) {
+        const hashPassword = user.hashPassword;
+        const salt = user.salt;
+
+        const attemptPassword = req.body.password
+        if (hashPassword == sha1(attemptPassword + salt)) {
+            // delete user
+            const result = await UserModel.User.deleteOne({email: userEmail})
+            res.send({
+                "message": "success",
+                "status": "user deleted"
+            });
+        } else {
+            console.log("Incorrect password")
+            res.sendStatus(401)
+        }
+    } else {
+        console.log("User not exist");
+        res.sendStatus(404);
+    }
+}
+
 module.exports = {
     GetUserHandler,
-    PostUserHandler
+    PostUserHandler,
+    PutUserDetailsHandler,
+    DeleteUserHandler
 }

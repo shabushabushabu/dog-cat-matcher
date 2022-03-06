@@ -24,12 +24,12 @@ const LoginHandler = async (req, res) => {
                 }))
             });
         } else {
-            console.log("Incorrect password")
-            res.sendStatus(401)
+            console.log("Incorrect password");
+            res.sendStatus(401);
         }
     } else {
-        console.log("Email not found")
-        res.sendStatus(401) 
+        console.log("Email not found");
+        res.sendStatus(401) ;
     }
 }
 
