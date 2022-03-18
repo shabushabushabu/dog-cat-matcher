@@ -15,7 +15,9 @@ const GetUserHandler = async (req, res) => {
         res.send(JSON.stringify({
             id: docs.id,
             name: docs.name,
-            email: docs.email
+            email: docs.email,
+            birthdate: docs.birthdate,
+            occupation: docs.occupation
         }));  
 
     } else{
@@ -43,6 +45,8 @@ const PostUserHandler = async (req, res) => {
         const newUser = UserModel.User({
             name: req.body.name,
             email: userEmail,
+            birthdate: new Date(req.body.birthdate),
+            occupation: req.body.occupation,
             hashPassword: sha1(req.body.password + salt),
             salt: salt
         });
@@ -51,30 +55,45 @@ const PostUserHandler = async (req, res) => {
         const result = await newUser.save()
         res.send(JSON.stringify({
             "result": "success",
+            "status": "user created",
             "userId": result._id.toString()
         }));
     }
 }
 
 const PutUserDetailsHandler = async (req, res) => {
-    console.log("PUT /user/:id");
+    console.log("PUT /user/:email"); // Should this be ID??
     console.log(req.body);
 
     const userEmail = req.params.email;
-    const docs = await UserModel.User.findOne({email: userEmail})
-    if (docs){
-        console.log("Update user to DB")
-        const result = await UserModel.User.updateOne(
-            {email: userEmail}, 
-            {name: req.body.name});
-        res.send(JSON.stringify({
-            "result": "success",
-            "status": "user details updated"
-        }));
-    } else{
-        console.log("User not exist")
-        res.sendStatus(404);
-    }
+
+    const updateUser = {
+        name: req.body.name, 
+        birthdate: new Date(req.body.birthdate), 
+        occupation: req.body.occupation
+    };
+    // const docs = await UserModel.User.findOne({email: userEmail}) // TODO is this necessary - perf
+    // if (docs){
+    //     console.log("Update user to DB")
+    //     const result = await UserModel.User.updateOne(
+    //         {email: userEmail}, 
+    //         {name: req.body.name, 
+    //         birthdate: new Date(req.body.birthdate), 
+    //         occupation: req.body.occupation});
+    //     res.send(JSON.stringify({
+    //         "result": "success",
+    //         "status": "user details updated"
+    //     }));
+    // } else{
+    //     console.log("User not exist");
+    //     res.sendStatus(404);
+    // }
+    const result = await UserModel.User.findOneAndUpdate({email: userEmail}, updateUser);
+    console.log(result)
+    res.send(JSON.stringify({
+        "result": result
+    }));
+    
 
 }
 
@@ -82,12 +101,11 @@ const DeleteUserHandler = async (req, res) => {
     console.log("DELETE /user/:email");
     console.log(req.body);
     
-
     const userEmail = req.params.email;
 
     const user = await UserModel.User.findOne({email: userEmail})
     if (user) {
-        const hashPassword = user.hashPassword;
+        const hashPassword = user.hashPassword; // confirm password
         const salt = user.salt;
 
         const attemptPassword = req.body.password
