@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const UserAPIs = require("./APIs/User");
 const AnimalAPIs = require("./APIs/Animal");
 const AuthenticationAPIs = require("./APIs/Authentication");
+const SearchAPIs = require("./APIs/Search");
 
 //----------- Initialisation -------------
 const app = express();
@@ -26,6 +27,8 @@ app.get("/animalList", AnimalAPIs.GetAnimalListHandler)
 app.post("/animal", AnimalAPIs.PostAnimalHandler)
 app.put("/animal/:id", AnimalAPIs.PutAnimalHandler)
 app.delete("/animal/:id", AnimalAPIs.DeleteAnimalHandler)
+
+app.get("/search/:tag", SearchAPIs.SearchAnimalListHandler)
 
 
 app.post("/login", AuthenticationAPIs.LoginHandler)              
