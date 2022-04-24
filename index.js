@@ -17,24 +17,24 @@ mongoose.connect('mongodb://localhost:27017/dogcatmatcher');
 
 //----------- API endpoints --------------
 
-app.get("/user/:email", UserAPIs.GetUserHandler)
-app.post("/user", UserAPIs.PostUserHandler)
-app.put("/user/:email", UserAPIs.PutUserDetailsHandler)
-app.delete("/user/:email", UserAPIs.DeleteUserHandler)
+app.get("/api/user/:email", UserAPIs.GetUserHandler)
+app.post("/api/user", UserAPIs.PostUserHandler)
+app.put("/api/user/:email", UserAPIs.PutUserDetailsHandler)
+app.delete("/api/user/:email", UserAPIs.DeleteUserHandler)
 
-app.get("/animal/:id", AnimalAPIs.GetAnimalByIdHandler)
-app.get("/animalList", AnimalAPIs.GetAnimalListHandler)
-app.post("/animal", AnimalAPIs.PostAnimalHandler)
-app.put("/animal/:id", AnimalAPIs.PutAnimalHandler)
-app.delete("/animal/:id", AnimalAPIs.DeleteAnimalHandler)
+app.get("/api/animal/:id", AnimalAPIs.GetAnimalByIdHandler)
+app.get("/api/animalList", AnimalAPIs.GetAnimalListHandler)
+app.post("/api/animal", AnimalAPIs.PostAnimalHandler)
+app.put("/api/animal/:id", AnimalAPIs.PutAnimalHandler)
+app.delete("/api/animal/:id", AnimalAPIs.DeleteAnimalHandler)
 
-app.get("/search/:tag", SearchAPIs.SearchAnimalListHandler)
+app.get("/api/search/:tag", SearchAPIs.SearchAnimalListHandler)
 
 
-app.post("/login", AuthenticationAPIs.LoginHandler)              
+app.post("/api/login", AuthenticationAPIs.LoginHandler)              
 
-app.get("/", (req, res) => {
-    console.log("GET /")
+app.get("/api", (req, res) => {
+    console.log("GET /api")
     res.sendStatus(200)
 });
 
