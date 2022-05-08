@@ -1,5 +1,6 @@
-const sha1= require('sha1');
+const sha1 = require('sha1');
 const crypto = require('crypto');
+// const fileUpload = require("express-fileupload");
 
 const AnimalModel = require("../Models/Animal");
 
@@ -10,10 +11,10 @@ const GetAnimalByIdHandler = async (req, res) => {
     const id = req.params.id;
 
     const docs = await AnimalModel.Animal.findById(id);
-    if (docs){
+    if (docs) {
         console.log("Get animal details")
-        res.send(JSON.stringify(docs));  
-    } else{
+        res.send(JSON.stringify(docs));
+    } else {
         console.log("Animal not found")
         res.sendStatus(404);
     }
@@ -25,10 +26,10 @@ const GetAnimalListHandler = async (req, res) => {
     const id = req.params.id;
 
     const docs = await AnimalModel.Animal.find();
-    if (docs){
+    if (docs) {
         console.log("Get animal list")
-        res.send(JSON.stringify(docs));  
-    } else{
+        res.send(JSON.stringify(docs));
+    } else {
         console.log("Animal not found")
         res.sendStatus(404);
     }
@@ -46,7 +47,35 @@ const PostAnimalHandler = async (req, res) => {
     })
 
     const result = await newAnimal.save();
-    res.send(JSON.stringify(result));  
+    res.send(JSON.stringify(result));
+}
+
+const UploadAnimalPhotoHandler = async (req, res) => {
+    try {
+        if (!req.files) {
+            res.sendStatus(400);
+        } else {
+            let photo = req.files.photo;
+            const photoUrl = "/photos/" + req.body.id + "/" + photo.name;
+
+            const doc = await AnimalModel.Animal.findById(req.body.id)
+
+            if (doc) {
+                await photo.mv("." + photoUrl);
+
+                doc.photoUrls = [photoUrl];
+
+                await doc.save();
+                res.sendStatus(201);
+            } else {
+                res.sendStatus(404);
+            }
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(500);
+    }
 }
 
 const PutAnimalHandler = async (req, res) => {
@@ -62,11 +91,11 @@ const PutAnimalHandler = async (req, res) => {
         tags: req.body.tags
     }
     // TODO check exist
-    const result = await AnimalModel.Animal.updateOne({_id: id}, updateAnimal);
+    const result = await AnimalModel.Animal.updateOne({ _id: id }, updateAnimal);
     res.send({
         "message": "success",
         "status": "animal updated"
-    });   
+    });
 }
 
 const DeleteAnimalHandler = async (req, res) => {
@@ -74,9 +103,9 @@ const DeleteAnimalHandler = async (req, res) => {
     console.log(req.params);
 
     const id = req.params.id;
-    
+
     // TODO check exist
-    const result = await AnimalModel.Animal.deleteOne({_id: id});
+    const result = await AnimalModel.Animal.deleteOne({ _id: id });
     res.send({
         "message": "success",
         "status": "animal deleted"
@@ -87,6 +116,7 @@ module.exports = {
     GetAnimalByIdHandler,
     GetAnimalListHandler,
     PostAnimalHandler,
+    UploadAnimalPhotoHandler,
     PutAnimalHandler,
     DeleteAnimalHandler
 }
