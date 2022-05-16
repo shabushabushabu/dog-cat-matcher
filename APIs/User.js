@@ -103,9 +103,9 @@ const DeleteUserHandler = async (req, res) => {
             const hashPassword = doc.hashPassword;
             const salt = doc.salt;
 
-            const attemptPassword = req.body.password
+            const attemptPassword = req.body.password;
             if (hashPassword == sha1(attemptPassword + salt)) {
-                const result = await UserModel.User.deleteOne({ _id: req.body.id })
+                const result = await UserModel.User.deleteOne({ _id: req.body.id });
                 res.sendStatus(200);
             } else {
                 res.sendStatus(401);
