@@ -135,6 +135,40 @@ paths:
         default:
           description: Unexpected error
 
+  /login:
+    post:
+      summary: Basic login endpoint
+      parameters:
+        - in: body
+          name: login
+          description: Login credential object
+          schema:
+            type: object
+            required:
+              - email
+              - password
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+      responses:
+        200:
+          description: Token object
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+              token:
+                type: string
+        401:
+          description: Unauthorized
+        404:
+          description: User with specified Email was not found
+        default:
+          description: Unexpected error
+
   /animals:
     get:
       summary: Return a list of all animals
