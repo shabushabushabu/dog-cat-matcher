@@ -26,10 +26,10 @@ mongoose.connect('mongodb://localhost:27017/dogcatmatcher');
 
 //----------- API endpoints --------------
 
-app.get("/api/user/:email", UserAPIs.GetUserHandler);
+app.get("/api/user/:userId", UserAPIs.GetUserHandler);
 app.post("/api/user", UserAPIs.PostUserHandler);
-app.put("/api/user/:email", UserAPIs.PutUserDetailsHandler);
-app.delete("/api/user/:email", UserAPIs.DeleteUserHandler);
+app.put("/api/user", UserAPIs.PutUserDetailsHandler);
+app.delete("/api/user", UserAPIs.DeleteUserHandler);
 
 app.get("/api/animals", AnimalAPIs.GetAnimalListHandler);
 app.get("/api/animal/:id", AnimalAPIs.GetAnimalByIdHandler);

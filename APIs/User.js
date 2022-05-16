@@ -5,25 +5,27 @@ const moment = require('moment');
 const UserModel = require("../Models/User");
 
 const GetUserHandler = async (req, res) => {
-    console.log("GET /user/:email");
+    console.log("GET /user/:userId");
     console.log(req.params);
 
-    const userEmail = req.params.email;
+    try {
+        const doc = await UserModel.User.findById(req.params.userId);
+        if (doc) {
+            res.send(JSON.stringify({
+                id: doc._id,
+                firstName: doc.firstName,
+                lastName: doc.lastName,
+                email: doc.email,
+                birthdate: doc.birthdate,
+                occupation: doc.occupation
+            }));
+        } else {
+            res.sendStatus(404);
+        }
 
-    const docs = await UserModel.User.findOne({ email: userEmail })
-    if (docs) {
-        console.log("Get user details")
-        res.send(JSON.stringify({
-            id: docs.id,
-            name: docs.name,
-            email: docs.email,
-            birthdate: docs.birthdate,
-            occupation: docs.occupation
-        }));
-
-    } else {
-        console.log("User not exist")
-        res.sendStatus(404);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
     }
 }
 
@@ -31,103 +33,90 @@ const PostUserHandler = async (req, res) => {
     console.log("POST /user");
     console.log(req.body);
 
-    // check existing users - callback , promise (then...), await
-    const userEmail = req.body.email;
+    try {
+        const docs = await UserModel.User.find({ email: req.body.email });
+        console.log(docs);
+        if (docs.length > 0) {
+            res.sendStatus(403);
+            return
+        } else {
+            const salt = crypto.randomBytes(128).toString('base64');
+            const newUser = UserModel.User({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                birthdate: moment(req.body.birthdate).utcOffset(0)
+                    .set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).format(),
+                occupation: req.body.occupation,
+                hashPassword: sha1(req.body.password + salt),
+                salt: salt,
+                activateDatetime: Date.now(),
+                status: "active"
+            });
+            const result = await newUser.save();
+            res.send(JSON.stringify({
+                "result": "success",
+                "userId": result._id.toString()
+            }));
+        }
 
-    const docs = await UserModel.User.find({ email: userEmail })
-    console.log(docs)
-    if (docs.length > 0) {
-        console.log("User Existed")
-        res.sendStatus(403)
-        return
-    } else {
-        console.log("Create new user")
-        const salt = crypto.randomBytes(128).toString('base64');
-        const newUser = UserModel.User({
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            email: userEmail,
-            birthdate: moment(req.body.birthdate).utcOffset(0)
-            .set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).format(),
-            occupation: req.body.occupation,
-            hashPassword: sha1(req.body.password + salt),
-            salt: salt,
-            activateDatetime: Date.now(),
-            status: "active"
-        });
-
-        console.log("Add new user to DB")
-        const result = await newUser.save()
-        res.send(JSON.stringify({
-            "result": "success",
-            "status": "user created",
-            "userId": result._id.toString()
-        }));
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
     }
 }
 
 const PutUserDetailsHandler = async (req, res) => {
-    console.log("PUT /user/:email"); // Should this be ID??
+    console.log("PUT /user");
     console.log(req.body);
 
-    const userEmail = req.params.email;
+    try {
+        const doc = await UserModel.User.findById(req.body.id);
+        if (doc) {
+            const updateUser = {
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                birthdate: moment(req.body.birthdate).utcOffset(0)
+                    .set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).format(),
+                occupation: req.body.occupation,
+                status: req.body.status
+            };
+            const result = await UserModel.User.updateOne({ _id: req.body.id }, updateUser);
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(404);
+        }
 
-    const updateUser = {
-        name: req.body.name,
-        birthdate: new Date(req.body.birthdate),
-        occupation: req.body.occupation
-    };
-    // const docs = await UserModel.User.findOne({email: userEmail}) // TODO is this necessary - perf
-    // if (docs){
-    //     console.log("Update user to DB")
-    //     const result = await UserModel.User.updateOne(
-    //         {email: userEmail}, 
-    //         {name: req.body.name, 
-    //         birthdate: new Date(req.body.birthdate), 
-    //         occupation: req.body.occupation});
-    //     res.send(JSON.stringify({
-    //         "result": "success",
-    //         "status": "user details updated"
-    //     }));
-    // } else{
-    //     console.log("User not exist");
-    //     res.sendStatus(404);
-    // }
-    const result = await UserModel.User.findOneAndUpdate({ email: userEmail }, updateUser);
-    console.log(result)
-    res.send(JSON.stringify({
-        "result": result
-    }));
-
-
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
+    }
 }
 
 const DeleteUserHandler = async (req, res) => {
-    console.log("DELETE /user/:email");
+    console.log("DELETE /user");
     console.log(req.body);
 
-    const userEmail = req.params.email;
+    try {
+        const doc = await UserModel.User.findById(req.body.id);
+        if (doc) {
+            const hashPassword = doc.hashPassword;
+            const salt = doc.salt;
 
-    const user = await UserModel.User.findOne({ email: userEmail })
-    if (user) {
-        const hashPassword = user.hashPassword; // confirm password
-        const salt = user.salt;
-
-        const attemptPassword = req.body.password
-        if (hashPassword == sha1(attemptPassword + salt)) {
-            // delete user
-            const result = await UserModel.User.deleteOne({ email: userEmail })
-            res.send({
-                "message": "success",
-                "status": "user deleted"
-            });
+            const attemptPassword = req.body.password
+            if (hashPassword == sha1(attemptPassword + salt)) {
+                const result = await UserModel.User.deleteOne({ _id: req.body.id })
+                res.sendStatus(200);
+            } else {
+                res.sendStatus(401);
+            }
         } else {
-            console.log("Incorrect password")
-            res.sendStatus(401)
+            res.sendStatus(404);
         }
-    } else {
-        console.log("User not exist");
-        res.sendStatus(404);
+
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
     }
 }
 
