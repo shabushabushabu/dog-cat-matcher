@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require('mongoose');
 const fileUpload = require('express-fileupload');
+const YAML = require('yamljs');
+const swaggerUi = require('swagger-ui-express');
 
 const UserAPIs = require("./APIs/User");
 const AnimalAPIs = require("./APIs/Animal");
@@ -10,6 +12,9 @@ const SearchAPIs = require("./APIs/Search");
 //----------- Initialisation -------------
 const app = express();
 const port = 4000;
+
+const swaggerDocument = YAML.load("./swagger.yaml");
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 app.use(fileUpload({
@@ -26,11 +31,11 @@ app.post("/api/user", UserAPIs.PostUserHandler);
 app.put("/api/user/:email", UserAPIs.PutUserDetailsHandler);
 app.delete("/api/user/:email", UserAPIs.DeleteUserHandler);
 
+app.get("/api/animals", AnimalAPIs.GetAnimalListHandler);
 app.get("/api/animal/:id", AnimalAPIs.GetAnimalByIdHandler);
-app.get("/api/animalList", AnimalAPIs.GetAnimalListHandler);
 app.post("/api/animal", AnimalAPIs.PostAnimalHandler);
-app.put("/api/animal/:id", AnimalAPIs.PutAnimalHandler);
-app.delete("/api/animal/:id", AnimalAPIs.DeleteAnimalHandler);
+app.put("/api/animal", AnimalAPIs.PutAnimalHandler);
+app.delete("/api/animal", AnimalAPIs.DeleteAnimalHandler);
 
 app.get("/api/search/:tag", SearchAPIs.SearchAnimalListHandler);
 

@@ -4,50 +4,61 @@ const crypto = require('crypto');
 
 const AnimalModel = require("../Models/Animal");
 
+const GetAnimalListHandler = async (req, res) => {
+    console.log("GET /animals");
+
+    try {
+        const docs = await AnimalModel.Animal.find();
+        if (docs) {
+            res.send(JSON.stringify(docs));
+        } else {
+            res.sendStatus(404);
+        }
+
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
+    }
+}
+
 const GetAnimalByIdHandler = async (req, res) => {
     console.log("GET /animal/:id");
     console.log(req.params);
 
-    const id = req.params.id;
+    try {
+        const doc = await AnimalModel.Animal.findById(req.params.id);
+        if (doc) {
+            res.send(JSON.stringify(doc));
+        } else {
+            res.sendStatus(404);
+        }
 
-    const docs = await AnimalModel.Animal.findById(id);
-    if (docs) {
-        console.log("Get animal details")
-        res.send(JSON.stringify(docs));
-    } else {
-        console.log("Animal not found")
-        res.sendStatus(404);
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
     }
 }
 
-const GetAnimalListHandler = async (req, res) => {
-    console.log("GET /animalList");
-
-    const id = req.params.id;
-
-    const docs = await AnimalModel.Animal.find();
-    if (docs) {
-        console.log("Get animal list")
-        res.send(JSON.stringify(docs));
-    } else {
-        console.log("Animal not found")
-        res.sendStatus(404);
-    }
-}
 
 const PostAnimalHandler = async (req, res) => {
     console.log("POST /animal");
     console.log(req.body);
 
-    const newAnimal = AnimalModel.Animal({
-        name: req.body.name,
-        description: req.body.description,
-        photoUrls: [],
-        tags: req.body.tags
-    })
+    try {
+        const newAnimal = AnimalModel.Animal({
+            name: req.body.name,
+            description: req.body.description,
+            photoUrls: [],
+            tags: req.body.tags
+        });
 
-    const result = await newAnimal.save();
-    res.send(JSON.stringify(result));
+        const result = await newAnimal.save();
+        res.send(JSON.stringify({ id: result._id }));
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
+    }
+
 }
 
 const UploadAnimalPhotoHandler = async (req, res) => {
@@ -79,37 +90,47 @@ const UploadAnimalPhotoHandler = async (req, res) => {
 }
 
 const PutAnimalHandler = async (req, res) => {
-    console.log("PUT /animal/:id");
+    console.log("PUT /animal");
     console.log(req.body);
 
-    const id = req.params.id;
+    try {
+        const doc = await AnimalModel.Animal.findById(req.body.id);
+        if (doc) {
+            const updateAnimal = {
+                name: req.body.name,
+                description: req.body.description,
+                // photoUrls: [],
+                tags: req.body.tags
+            }
+            const result = await AnimalModel.Animal.updateOne({ _id: req.body.id }, updateAnimal);
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(404);
+        }
 
-    const updateAnimal = {
-        name: req.body.name,
-        description: req.body.description,
-        photoUrls: [],
-        tags: req.body.tags
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
     }
-    // TODO check exist
-    const result = await AnimalModel.Animal.updateOne({ _id: id }, updateAnimal);
-    res.send({
-        "message": "success",
-        "status": "animal updated"
-    });
 }
 
 const DeleteAnimalHandler = async (req, res) => {
-    console.log("DELETE /animal/:id");
+    console.log("DELETE /animal");
     console.log(req.params);
 
-    const id = req.params.id;
+    try {
+        const doc = await AnimalModel.Animal.findById(req.body.id);
+        if (doc) {
+            const result = await AnimalModel.Animal.deleteOne({ _id: req.body.id});
+            res.sendStatus(200);
+        } else {
+            res.sendStatus(404);
+        }
 
-    // TODO check exist
-    const result = await AnimalModel.Animal.deleteOne({ _id: id });
-    res.send({
-        "message": "success",
-        "status": "animal deleted"
-    });
+    } catch (err) {
+        console.error(err);
+        res.sendStatus(400);
+    }
 }
 
 module.exports = {
