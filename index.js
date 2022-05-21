@@ -24,6 +24,12 @@ app.use("/photos", express.static("photos"));
 
 mongoose.connect('mongodb://localhost:27017/dogcatmatcher');
 
+// const db_user = process.env.MONGO_USERNAME;
+// const db_password = process.env.MONGO_PASSWORD;
+// const db = process.env.MONGO_DATABASE;
+// mongoose.connect(
+//     'mongodb://' + db_user + ':' + db_password + '@' + db + ':27017/dogcatmatcher');
+
 //----------- API endpoints --------------
 
 app.get("/api/user/:userId", UserAPIs.GetUserHandler);
@@ -48,6 +54,8 @@ app.get("/api", (req, res) => {
     console.log("GET /api")
     res.sendStatus(200)
 });
+
+// app.use("/", express.static("build"));
 
 
 //------------ Start server ----------------

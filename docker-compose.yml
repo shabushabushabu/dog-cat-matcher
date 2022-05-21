@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  node:
+    image: "node:16"
+    user: "node"
+    working_dir: "/home/node/app"
+    environment:
+      - NODE_ENV=production
+      # - MONGO_USERNAME=root
+      # - MONGO_PASSWORD=example
+      - MONGO_DATABASE=dogcatmatcher
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./:/home/node/app
+    command: "npm start"
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    environment:
+      # MONGO_INITDB_ROOT_USERNAME: root
+      # MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: dogcatmatcher
+    expose:
+      - "27017"
+    volumes:
+      - ./data:/data/db
